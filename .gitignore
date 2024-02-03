@@ -1,0 +1,41 @@
+# If you prefer the allow list template instead of the deny list, see community template:
+# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+#
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+cmd/kv-server/kv-server
+cmd/kv-client/kv-client
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Clojure
+jepsen/pom.xml
+jepsen/pom.xml.asc
+jepsen/*.jar
+jepsen/*.class
+jepsen/lib/
+jepsen/classes/
+jepsen/target/
+jepsen/checkouts/
+jepsen/.lein-deps-sum
+jepsen/.lein-repl-history
+jepsen/.lein-plugins/
+jepsen.lein-failures
+jepsen/.nrepl-port
+jepsen/.cpcache/
+jepsen/.clj-kondo
+jepen/.lsp
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace file
+go.work

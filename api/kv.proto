@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option go_package = "github.com/jmsadair/raft-example/protobuf";
+
+message KeyValueStore {
+  map<string, string> key_value_table = 1;
+  map<uint32, Session> session_table = 2;
+}
+
+message Session {
+  uint64 sequence_number = 1;
+  string last_result = 2;
+}
+
+message Request {
+  string key = 1;
+  string value = 2;
+  uint64 sequence_number = 3;
+  uint32 client = 5;
+}
+
+message Response { string value = 1; }
+
+service KeyValue {
+  rpc Put(Request) returns (Response) {}
+  rpc Get(Request) returns (Response) {}
+}

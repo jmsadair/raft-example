@@ -1,0 +1,118 @@
+name: Format
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Git Config
+        run: |
+          git config --global user.name 'James Adair'
+          git config --global user.email 'jmsadair@gmail.com'
+
+      - name: Install clang-format
+        run: sudo apt install -y clang-format
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Format .proto files
+        run: clang-format -i api/*.proto
+
+      - name: Check for modified .proto files
+        id: git-check-1
+        run: |
+          if [[ $(git diff --name-only) == *".proto"* ]]; then
+            echo "MODIFIED=true" >> $GITHUB_OUTPUT
+          else
+            echo "MODIFIED=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check output
+        run: echo "Modified is ${{ steps.git-check-1.outputs.MODIFIED }}"
+
+      - name: Commit clang-format changes
+        if: steps.git-check-1.outputs.MODIFIED == 'true'
+        run: |
+          git commit -am "Committing clang-format changes"
+          git push
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20'
+
+      - name: Install gofumpt
+        run: go install mvdan.cc/gofumpt@latest
+
+      - name: Install golines
+        run: go install github.com/segmentio/golines@latest
+
+      - name: Format Go code
+        run: gofumpt -l -w .
+
+      - name: Fix line length
+        run: golines -w .
+      
+      - name: Check for modified .go files
+        id: git-check-2
+        run: |
+          if [[ $(git diff --name-only) == *".go"* ]]; then
+            echo "MODIFIED=true" >> $GITHUB_OUTPUT
+          else
+            echo "MODIFIED=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit go fmt changes
+        if: steps.git-check-2.outputs.MODIFIED == 'true'
+        run: |
+          git commit -am "Committing go fmt changes"
+          git push
+
+      - name: Install shfmt
+        run: go install mvdan.cc/sh/v3/cmd/shfmt@latest
+
+      - name: Format shell code
+        run: shfmt -l -w demo.sh
+
+      - name: Check for modified .sh files
+        id: git-check-3
+        run: |
+          if [[ $(git diff --name-only) == *".sh"* ]]; then
+            echo "MODIFIED=true" >> $GITHUB_OUTPUT
+          else
+            echo "MODIFIED=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit shfmt changes
+        if: steps.git-check-3.outputs.MODIFIED == 'true'
+        run: |
+          git commit -am "Committing shfmt changes"
+          git push
+
+      - name: Install cljfmt
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/weavejester/cljfmt/HEAD/install.sh)"
+
+      - name: Run cljfmt
+        run: |
+          cd jepsen
+          cljfmt fix
+          cd ..
+
+      - name: Check for modified .clj files
+        id: git-check-4
+        run: |
+          if [[ $(git diff --name-only) == *".clj"* ]]; then
+            echo "MODIFIED=true" >> $GITHUB_OUTPUT
+          else
+            echo "MODIFIED=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit cljfmt changes
+        if: steps.git-check-4.outputs.MODIFIED == 'true'
+        run: |
+          git commit -am "Committing cljfmt changes"
+          git push
