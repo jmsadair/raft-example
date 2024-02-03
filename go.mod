@@ -3,7 +3,7 @@ module github.com/jmsadair/raft-example
 go 1.20
 
 require (
-	github.com/google/uuid v1.5.0
+	github.com/google/uuid v1.6.0
 	github.com/jmsadair/raft v0.1.8
 	github.com/stretchr/testify v1.8.4
 	github.com/urfave/cli/v2 v2.27.1
