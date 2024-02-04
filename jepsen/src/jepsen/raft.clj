@@ -49,8 +49,8 @@
   (debian/install [:git-core])
   (c/exec :mkdir :-p dir)
   (c/cd dir
-         (when-not (cu/exists? "raft-example")
-           (c/exec :git :clone "https://github.com/jmsadair/raft-example.git")))
+        (when-not (cu/exists? "raft-example")
+          (c/exec :git :clone "https://github.com/jmsadair/raft-example.git")))
   (c/cd dir
         (c/cd "raft-example/cmd/kv-server"
               (c/exec :go :build)
