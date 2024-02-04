@@ -156,7 +156,7 @@ done
 # Kill off two of the key-value servers.
 servers_killed=0
 while clients_running; do
-	sleep 5
+	sleep 1
 	if [ $servers_killed -lt 2 ]; then
 		mapfile -t server_pids < <(pgrep -f "kv-server")
 		num_servers=${#server_pids[@]}
