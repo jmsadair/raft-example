@@ -29,7 +29,7 @@ Refer to `demo.sh` or run `bash demo.sh --help` to see all options.
 
 ## Testing
 This repository also includes a Jepsen test for the key-value store. To run the test, you are going to need to setup a Jepsen environment, including a control node with a JVM and 
-Leiningen, and a collection of Debian nodes. There are instructions for setting up a Jepsen environent [here](https://github.com/jepsen-io/jepsen).
+Leiningen, and a collection of Debian nodes that have Go installed. There are instructions for setting up a Jepsen environent [here](https://github.com/jepsen-io/jepsen).
 
 Once your environment is ready, you should be able to run something like:
 
