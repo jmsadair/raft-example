@@ -47,23 +47,23 @@
   [node version]
   (info node "Installing raft-example" version)
   (c/su
-    (c/cd dir
-          (when-not (cu/file? server-binary) 
-            (c/exec :git :clone :--depth 1 "https://github.com/jmsadair/raft-example.git")))
-          (c/cd "/raft-example/cmd/kv-server")
-          (c/exec :go :build)
-          (c/exec :cp :server-binary :dir)
-          (c/cd dir)
-          (c/cd "/raft-example/cmd/kv-client")
-          (c/exec :go :build)
-          (c/exec :cp :client-binary :dir)))
+   (c/cd dir
+         (when-not (cu/file? server-binary)
+           (c/exec :git :clone :--depth 1 "https://github.com/jmsadair/raft-example.git")))
+   (c/cd "/raft-example/cmd/kv-server")
+   (c/exec :go :build)
+   (c/exec :cp :server-binary :dir)
+   (c/cd dir)
+   (c/cd "/raft-example/cmd/kv-client")
+   (c/exec :go :build)
+   (c/exec :cp :client-binary :dir)))
 
 (defn bootstrap!
   "Bootstrap a server with an initial configuration"
   [test node]
   (info node "Bootstrapping server")
   (c/cd dir
-        (c/exec server-binary :-id node :-d data-dir :bootstrap :-c (cluster test raft-port) 
+        (c/exec server-binary :-id node :-d data-dir :bootstrap :-c (cluster test raft-port)
                 (c/lit (str ">>" logfile " 2>&1 &")))))
 
 (defn start!
