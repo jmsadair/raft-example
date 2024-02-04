@@ -16,12 +16,12 @@
             [jepsen.control.util :as cu]
             [jepsen.os.debian :as debian]))
 
-(def dir "/root")
-(def logfile "/root/data/server.log")
-(def pidfile "/root/server.pid")
-(def data-dir "/root/data")
-(def server-binary "./kv-server")
-(def client-binary "./kv-client")
+(def dir "/opt/kv-server")
+(def logfile (str dir "/kv-server.log"))
+(def pidfile (str dir "/kv-server.pid"))
+(def data-dir (str dir "/data"))
+(def server-binary "kv-server")
+(def client-binary "kv-client")
 (def raft-port ":5254")
 (def kv-port ":5255")
 (def bootstrap-node "n1")
@@ -44,8 +44,12 @@
 
 (defn install!
   "Install raft-example"
-  [node]
-  (info node "Installing raft-example"))
+  [node version]
+  (info node "Installing raft-example" version)
+  (c/su
+        (let [url (str "https://github.com/jmsadair/raft-example/releases/download/"
+                       version "/raft-example-" version ".tar.gz")]
+          (cu/install-archive! url dir))))
 
 (defn bootstrap!
   "Bootstrap a server with an initial configuration"
@@ -63,28 +67,28 @@
     {:logfile logfile
      :pidfile pidfile
      :chdir   dir}
-    "kv-server"
+    server-binary
     :-id node
     :-d data-dir
     :start
     :-a kv-port
     :-ra raft-port)
-   (Thread/sleep 5000)))
+   (Thread/sleep 10000)))
 
 (defn stop!
   "Stop the server"
   [node]
   (info node "Stopping server")
-  (cu/stop-daemon! "kv-server" pidfile)
-  (c/su (c/exec :rm :-rf data-dir)))
+  (cu/stop-daemon! server-binary pidfile)
+  (c/su (c/exec :rm :-rf dir)))
 
 (defn db
   "Setup and tear down the server"
-  []
+  [version]
   (reify db/DB
     (setup! [_ test node]
       (info node "Setting up server")
-      (install! node)
+      (install! node version)
       (c/exec :mkdir :-p data-dir)
       (when (= (name node) bootstrap-node)
         (bootstrap! test node))
@@ -115,7 +119,7 @@
   [test node k v]
   (c/on node
         (c/su
-         (c/cd "/root"
+         (c/cd dir
                (c/exec client-binary
                        :-c (cluster test kv-port)
                        :put
@@ -149,7 +153,7 @@
          {:pure-generators true
           :name            "raft"
           :os              debian/os
-          :db              (db)
+          :db              (db "v0.0.1")
           :client          (ServerClient. nil)
           :nemesis         (nemesis/partition-random-halves)
           :checker (checker/compose
