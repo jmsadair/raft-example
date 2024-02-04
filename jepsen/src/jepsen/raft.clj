@@ -44,8 +44,8 @@
 
 (defn install!
   "Install raft-example"
-  [node version]
-  (info node "Installing raft-example" version)
+  [node]
+  (info node "Installing raft-example")
   (debian/install [:git-core])
   (c/exec :mkdir :-p dir)
   (c/cd dir
@@ -94,11 +94,11 @@
 
 (defn db
   "Setup and tear down the server"
-  [version]
+  []
   (reify db/DB
     (setup! [_ test node]
       (info node "Setting up server")
-      (install! node version)
+      (install! node)
       (when (= (name node) bootstrap-node)
         (bootstrap! test node))
       (start! node))
@@ -162,7 +162,7 @@
          {:pure-generators true
           :name            "raft-test"
           :os              debian/os
-          :db              (db "v0.0.1")
+          :db              (db)
           :client          (ServerClient. nil)
           :nemesis         (nemesis/partition-random-halves)
           :checker (checker/compose
