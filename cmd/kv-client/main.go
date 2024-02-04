@@ -44,7 +44,7 @@ func operation(cCtx *cli.Context, isPut bool) error {
 
 func main() {
 	app := &cli.App{
-		Name:                 "key-value-client",
+		Name:                 "kv-client",
 		Usage:                "a demo client for the key-value server",
 		Description:          "this is a simple client for the key-value server - it should only be used as a demonstration and for testing purposes",
 		EnableBashCompletion: true,

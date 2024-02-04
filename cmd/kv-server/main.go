@@ -96,7 +96,7 @@ func serve(cCtx *cli.Context) error {
 
 func main() {
 	app := &cli.App{
-		Name:                 "key-value-server",
+		Name:                 "kv-server",
 		Usage:                "a demo key-value server",
 		Description:          "this is a simple key-value server that is replicated using raft - it should only be used as a demonstration and for testing purposes",
 		EnableBashCompletion: true,
