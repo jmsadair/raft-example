@@ -46,17 +46,19 @@
   "Install raft-example"
   [node version]
   (info node "Installing raft-example" version)
-  (c/su
-   (c/cd dir
-         (when-not (cu/file? server-binary)
-           (c/exec :git :clone :--depth 1 "https://github.com/jmsadair/raft-example.git")))
-   (c/cd "/raft-example/cmd/kv-server")
-   (c/exec :go :build)
-   (c/exec :cp :server-binary :dir)
-   (c/cd dir)
-   (c/cd "/raft-example/cmd/kv-client")
-   (c/exec :go :build)
-   (c/exec :cp :client-binary :dir)))
+  (debian/install [:git-core])
+  (c/exec :mkdir :-p dir)
+  (c/cd dir
+         (when-not (cu/exists? "raft-example")
+           (c/exec :git :clone "https://github.com/jmsadair/raft-example.git")))
+  (c/cd dir
+        (c/cd "raft-example/cmd/kv-server"
+              (c/exec :go :build)
+              (c/exec :cp :-f "kv-server" "/opt/kv-server")))
+  (c/cd dir
+        (c/cd "raft-example/cmd/kv-client"
+              (c/exec :go :build)
+              (c/exec :cp :-f "kv-client" "/opt/kv-server"))))
 
 (defn bootstrap!
   "Bootstrap a server with an initial configuration"
@@ -75,7 +77,7 @@
     {:logfile logfile
      :pidfile pidfile
      :chdir   dir}
-    server-binary
+    "kv-server"
     :-id node
     :-d data-dir
     :start
@@ -87,7 +89,7 @@
   "Stop the server"
   [node]
   (info node "Stopping server")
-  (cu/stop-daemon! server-binary pidfile)
+  (cu/stop-daemon! "kv-server" pidfile)
   (c/su (c/exec :rm :-rf dir)))
 
 (defn db
@@ -97,7 +99,6 @@
     (setup! [_ test node]
       (info node "Setting up server")
       (install! node version)
-      (c/exec :mkdir :-p data-dir)
       (when (= (name node) bootstrap-node)
         (bootstrap! test node))
       (start! node))
