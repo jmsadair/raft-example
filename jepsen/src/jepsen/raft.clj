@@ -20,8 +20,8 @@
 (def logfile (str dir "/kv-server.log"))
 (def pidfile (str dir "/kv-server.pid"))
 (def data-dir (str dir "/data"))
-(def server-binary "kv-server")
-(def client-binary "kv-client")
+(def server-binary "./kv-server")
+(def client-binary "./kv-client")
 (def raft-port ":5254")
 (def kv-port ":5255")
 (def bootstrap-node "n1")
@@ -47,16 +47,24 @@
   [node version]
   (info node "Installing raft-example" version)
   (c/su
-        (let [url (str "https://github.com/jmsadair/raft-example/releases/download/"
-                       version "/raft-example-" version ".tar.gz")]
-          (cu/install-archive! url dir))))
+    (c/cd dir
+          (when-not (cu/file? server-binary) 
+            (c/exec :git :clone :--depth 1 "https://github.com/jmsadair/raft-example.git")))
+          (c/cd "/raft-example/cmd/kv-server")
+          (c/exec :go :build)
+          (c/exec :cp :server-binary :dir)
+          (c/cd dir)
+          (c/cd "/raft-example/cmd/kv-client")
+          (c/exec :go :build)
+          (c/exec :cp :client-binary :dir)))
 
 (defn bootstrap!
   "Bootstrap a server with an initial configuration"
   [test node]
   (info node "Bootstrapping server")
   (c/cd dir
-        (c/exec server-binary :-id node :-d data-dir :bootstrap :-c (cluster test raft-port) (c/lit (str ">>" logfile " 2>&1 &")))))
+        (c/exec server-binary :-id node :-d data-dir :bootstrap :-c (cluster test raft-port) 
+                (c/lit (str ">>" logfile " 2>&1 &")))))
 
 (defn start!
   "Start the server"
@@ -151,7 +159,7 @@
   (merge tests/noop-test
          opts
          {:pure-generators true
-          :name            "raft"
+          :name            "raft-test"
           :os              debian/os
           :db              (db "v0.0.1")
           :client          (ServerClient. nil)
