@@ -1,3 +1,7 @@
+![build](https://github.com/jmsadair/raft-example/actions/workflows/build.yml/badge.svg)
+![GitHub](https://img.shields.io/github/license/jmsadair/raft-example)
+![GitHub go.mod Go version (subdirectory of monorepo)](https://img.shields.io/github/go-mod/go-version/jmsadair/raft-example)
+
 # Raft-Example
 This is a simple key-value store that is replicated using [jmsadair/raft](https://github.com/jmsadair/raft). This is a minimal implementation that is intended to serve as an example of how one might use raft in a real system as well as for testing purposes. 
 It should not be used in production.
