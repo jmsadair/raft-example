@@ -86,29 +86,25 @@ func (s *Server) Stop() {
 
 // Get retreives the value of a key.
 func (s *Server) Get(ctx context.Context, request *pb.Request) (*pb.Response, error) {
-	data, err := proto.Marshal(request)
-	if err != nil {
-		return nil, err
-	}
-	return s.submitOperation(data, raft.LinearizableReadOnly)
+	return s.submitOperation(request, raft.LinearizableReadOnly)
 }
 
 // Put sets the value of a key.
 func (s *Server) Put(ctx context.Context, request *pb.Request) (*pb.Response, error) {
-	data, err := proto.Marshal(request)
-	if err != nil {
-		return nil, err
-	}
-	return s.submitOperation(data, raft.Replicated)
+	return s.submitOperation(request, raft.Replicated)
 }
 
 func (s *Server) submitOperation(
-	operation []byte,
+	request *pb.Request,
 	operationType raft.OperationType,
 ) (*pb.Response, error) {
+	operation, err := proto.Marshal(request)
+	if err != nil {
+		log.Fatalf("failed to marshal request: error = %v", err)
+	}
+
 	future := s.node.SubmitOperation(operation, operationType, futureTimeout)
 	result := future.Await()
-
 	if err := result.Error(); err != nil {
 		switch err {
 		case raft.ErrNotLeader:
@@ -121,5 +117,6 @@ func (s *Server) submitOperation(
 	}
 
 	response := result.Success()
+
 	return response.ApplicationResponse.(*pb.Response), nil
 }
